@@ -57,24 +57,24 @@ async def add_destination(dest):
 
 
 
-async def add_book():
+async def add_book(book):
     async with async_session() as session:
-        book = Booking(
+        # book = Booking(
            
-            tour_id=1,
+        #     tour_id=1,
            
-            booking_date=date(2024, 12, 30),
-            total_price=2380
-        )
-        book1 = Booking(
+        #     booking_date=date(2024, 12, 30),
+        #     total_price=2380
+        # )
+        # book1 = Booking(
           
-            tour_id=1,
+        #     tour_id=1,
             
-            booking_date=date(2025, 1, 1),
-            total_price=850
-        )
+        #     booking_date=date(2025, 1, 1),
+        #     total_price=850
+        # )
         session.add(book)
-        session.add(book1)
+        # session.add(book1)
         await session.commit()
 
 
@@ -119,7 +119,7 @@ async def all_destination(limit,offset):
     
 
 
-    async def all_book(limit,offset):
+async def all_books(limit,offset):
      async with async_session() as s:
         result = await s.scalars(select(Booking).offset(offset).limit(limit))
         return result.all()

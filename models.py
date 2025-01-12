@@ -19,7 +19,7 @@ class User(Base):
     __tablename__ = "user"
 
     id:Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    telegram_id:Mapped = mapped_column(Integer, nullable=False)
+    telegram_id:Mapped[int] = mapped_column(Integer, nullable=False)
 
 
 

@@ -1,6 +1,6 @@
 from aiogram import Router, types
 from aiogram.filters import Command,CommandStart
-from aiogram.types import Message, CallbackQuery, FSInputFile, URLInputFile
+from aiogram.types import Message, CallbackQuery, FSInputFile
 from aiogram import F
 import re
 from command.keyboards import *
@@ -28,7 +28,7 @@ async def tours_handler(message: Message):
 
 @command_router.message(F.text == 'Мои бронирования')
 async def movies_handler(message: Message):
-    await message.answer(f'Мои бронирования', reply_markup=await get_book_kb())
+    await message.answer(f'Мои бронирования', reply_markup=await get_book_kb(page=1))
 
 
 @command_router.callback_query(F.data.startswith('tour_'))
@@ -52,7 +52,43 @@ async def tour_detail_handler(callback: CallbackQuery):
 
     await callback.message.answer_media_group(media=album.build()) 
 
+
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="Бронировать", callback_data=f"add_dish_{tour_id}")]])
+    await callback.message.answer("Бронировать?\nДля просмотра бронированные нажмите на кнопку Мои бронирование", reply_markup=keyboard)
   
+
+
+@command_router.callback_query(F.data.startswith("add_tour"))
+async def add_tour_to_cart(callback: CallbackQuery):
+    tour_id = callback.data.split("_")[2]
+    tour = await get_tour_by_id(tour_id)
+    user_id = callback.from_user.id
+    User[user_id].append(tour)
+    await callback.answer(f"'{tour.title}' забронирвано!", show_alert=True)
+
+
+
+    
+ 
+
+@command_router.callback_query(F.data == "book_")
+async def checkout_handler(callback: CallbackQuery, state):
+    user_id = callback.from_user.id
+    cart = User[user_id]
+    if not cart:
+        await callback.message.answer("Пусто.")
+        return
+
+    await state.update_data(cart=cart)
+    await callback.message.answer("Оставьте свои данные мы связимся с вами в ближайщее время:")
+  
+
+
+   
+
+
+
 
 
 @command_router.callback_query(F.data.startswith('page_'))
@@ -83,21 +119,23 @@ async def page_hadler(callback: CallbackQuery):
     await callback.message.edit_reply_markup(reply_markup=await get_destination_kb(page=id))
 
 
+@command_router.callback_query(F.data.startswith('page_'))
+async def page_hadler(callback: CallbackQuery):
+    data = callback.data.split('_')[1]
+    id  = int(data)
+    await callback.message.edit_reply_markup(reply_markup=await get_book_kb(page=id))
 
-@command_router.message(F.text == 'Мои бронирование')
-async def my_booking(message:types.Message):
-    session: Session = Session()
 
 
-    booking = session.query(Booking).filter_by(user_id=user_id).all()
+    # booking = session.query(Booking).filter_by(user_id=user_id).all()
 
-    if not booking:
-        await message.answer("У вас нет забронированных туров")
-    else:
-        response = "Ваши бронирования:\n"
-        for book in booking:
-            response += f"-{book.tour_id}\n"
-            await message.answer(response)
+    # if not booking:
+    #     await message.answer("У вас нет забронированных туров")
+    # else:
+    #     response = "Ваши бронирования:\n"
+    #     for book in booking:
+    #         response += f"-{book.tour_id}\n"
+    #         await message.answer(response)
 
 
 

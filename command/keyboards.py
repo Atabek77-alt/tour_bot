@@ -65,10 +65,7 @@ PAGE_SIZE = 2
 async def get_book_kb(page):
     offset = (page - 1) * PAGE_SIZE
     kb = InlineKeyboardBuilder()
- 
-    async with async_session() as session:
-        result = await session.execute(select(Booking).offset(offset).limit(PAGE_SIZE))
-        books = result.scalars().all()
+    books =  await all_books(offset=offset,limit=PAGE_SIZE)
 
     for book in books:
         kb.add(InlineKeyboardButton(text=book.tour_id, callback_data=f'book_{book.id}'))
@@ -86,7 +83,13 @@ async def get_tour_kb_admin():
     kb = InlineKeyboardBuilder()
     tours = await all_tours()
     for tour in tours:
-        kb.add(InlineKeyboardButton(text=tour.title, callback_data=f'movie2_admin_{tour.id}'))
+        kb.add(InlineKeyboardButton(text=tour.title, callback_data=f'tour2_admin_{tour.id}'))
     return kb.adjust(2).as_markup()
 
 
+
+async def get_tour_order_keyboard(tour_id): 
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="Бронировать", 
+                callback_data=f"add_tour{tour_id}")]])
